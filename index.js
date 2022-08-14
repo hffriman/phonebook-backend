@@ -59,25 +59,10 @@ app.post('/api/persons', (request, response) => {
     }
 
     const person = new Person({
-        id: generateId(),
         name: body.name,
         number: body.number,
         date: new Date(),
     })
-
-    const sameId = persons.filter(p => p.id === person.id)
-    const sameName = persons.filter(p => p.name.toLowerCase() === person.name.toLowerCase())
-
-
-    if (sameId.length > 0) {
-        return response.status(404).json({
-            error: 'The id is already taken. Try again'
-        })
-    } else if (sameName.length > 0) {
-        return response.status(404).json({  
-            error: 'The name is already taken.'
-        })
-    }
     
     person.save().then(savedPerson => {
         response.json(savedPerson)
