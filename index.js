@@ -117,9 +117,9 @@ const errorHandler = (error, request, response, next) => {
         return response.status(400).json({
             error: error.message
         })
-    } else if (error.name === 'TypeError') {
+    } else if (error.name === 'TypeError' || error.name === 'Uncaught TypeError') {
         return response.status(400).json({
-            error: error.message
+            error: 'The name has already been removed from the server. Please refresh the page to continue'
         })
     }
     next(error)
