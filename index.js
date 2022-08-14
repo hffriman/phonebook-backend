@@ -5,11 +5,17 @@ const cors = require('cors')
 require('dotenv').config()
 const Person = require('./models/person')
 
-morgan.token('body', (req, res) => JSON.stringify(req.body))
+const requestLogger = (request, response, next) => {
+    console.log('Method:', request.method)
+    console.log('Path:', request.path)
+    console.log('Body:', request.body)
+    console.log('---')
+    next()
+}
+
+app.use(requestLogger)
 
 app.use(express.json())
-
-app.use(morgan(`:method :url :status :res[content-length] - :response-time ms :body`))
 
 app.use(cors())
 
@@ -31,7 +37,7 @@ app.get('/info', (request, response) => {
     response.send(`<p>Phonebook has info for ${length} people</p> <p>${date}</p>`)
 })
 
-app.get('/api/persons/:id', (request, response, next) => {
+app.get('/api/persons/:id', (request, response) => {
     Person.findById(request.params.id)
         .then(person => {
             if (person) {
@@ -41,11 +47,11 @@ app.get('/api/persons/:id', (request, response, next) => {
             }
         })
         .catch(error => {
-            next(error)
+            console.log(error)
         })
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
     
     if (!body.number) {
@@ -84,12 +90,12 @@ app.put('/api/persons/:id', (request, response, next) => {
         .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (request, response, next) => {
+app.delete('/api/persons/:id', (request, response) => {
     Person.findByIdAndRemove(request.params.id)
         .then(result => {
             response.status(204).end()
         })
-        .catch(error => next(error))
+        .catch(error => console.log(error))
 })
 
 const unknownEndpoint = (request, response) => {
@@ -112,7 +118,6 @@ const errorHandler = (error, request, response, next) => {
             error: error.message
         })
     }
-
     next(error)
 }
 
